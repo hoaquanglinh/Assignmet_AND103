@@ -47,7 +47,7 @@
         android:id="@+id/btndangnhapdk"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@drawable/dangnhapdk"
+        android:background="@drawable/dangnhap"
         android:text="ĐĂNG KÝ"
         android:textColor="@color/white"
         android:textStyle="bold"

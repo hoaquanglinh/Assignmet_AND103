@@ -2,6 +2,7 @@ package com.example.assignmet_ph43159;
 
 import static android.content.ContentValues.TAG;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -34,6 +35,7 @@ public class Phone extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_phone);
 
         EditText edtPhone = findViewById(R.id.edtphone);

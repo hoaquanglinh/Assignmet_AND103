@@ -1,5 +1,6 @@
 package com.example.assignmet_ph43159;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -34,6 +35,7 @@ public class DangNhap extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_dang_nhap);
 
         EditText taikhoan = findViewById(R.id.txtuser);

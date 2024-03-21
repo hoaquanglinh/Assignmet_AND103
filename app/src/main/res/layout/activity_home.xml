@@ -5,6 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp"
+    android:id="@+id/home"
+    android:layout_marginTop="30dp"
     tools:context=".Home">
 
     <LinearLayout
@@ -14,7 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Danh sách sinh viên"
+            android:text="Danh sách sản phẩm"
             android:textSize="30dp"
             android:textStyle="bold"
             android:gravity="center"
@@ -22,16 +24,19 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewSinhVien"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"/>
     </LinearLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnAdd"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:background="#43A047"
+        android:background="@drawable/oval"
         android:layout_gravity="bottom|end"
-        android:layout_margin="15dp"
-        android:backgroundTint="#7CB342"/>
+        android:layout_margin="10dp"
+        android:text="ADD"
+        android:textColor="@color/white"
+        />
 
 </FrameLayout>
