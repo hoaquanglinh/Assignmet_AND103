@@ -14,6 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.assignmet_ph43159.Home;
 import com.example.assignmet_ph43159.Model.Cay;
 import com.example.assignmet_ph43159.R;
@@ -50,8 +51,10 @@ public class AdapterCay extends RecyclerView.Adapter<AdapterCay.ViewHolder>{
         holder.tvgia.setText(numberFormat.format(cay.getGia())+" đ");
         holder.tvkichthuoc.setText(cay.getKichthuoc());
 
-        Picasso.get().load(cay.getAnh()).into(holder.avatar);
-//        Picasso.get().load("http://10.0.2.2:3000/api/gallery/1.jpg").into(holder.avatar);
+        Glide.with(context)
+                .load(cay.getAnh())
+                .thumbnail(Glide.with(context).load(R.drawable.loading))
+                .into(holder.image);
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,10 +78,10 @@ public class AdapterCay extends RecyclerView.Adapter<AdapterCay.ViewHolder>{
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvten, tvgia, tvkichthuoc;
         Button btnDelete, btnUpdate;
-        ImageView avatar;
+        ImageView image;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            avatar = itemView.findViewById(R.id.avatar);
+            image = itemView.findViewById(R.id.image);
             tvten = itemView.findViewById(R.id.tvTen);
             tvgia = itemView.findViewById(R.id.tvGia);
             tvkichthuoc = itemView.findViewById(R.id.tvKichThuoc);

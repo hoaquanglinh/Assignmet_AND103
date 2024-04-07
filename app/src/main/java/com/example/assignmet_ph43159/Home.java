@@ -4,6 +4,10 @@ package com.example.assignmet_ph43159;
 import static android.content.ContentValues.TAG;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -12,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -25,21 +30,31 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.assignmet_ph43159.Adapter.AdapterCay;
 import com.example.assignmet_ph43159.Model.Cay;
 
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -55,16 +70,20 @@ public class Home extends AppCompatActivity {
     AdapterCay adapter;
     List<Cay> list;
     APIService apiService;
-    EditText edten, edgia, edkichthuoc, edtlinkurl;
+    EditText edten, edgia, edkichthuoc, search;
     ImageView anh;
     Uri selectedImage;
     Cay cay;
-    private static final int REQUEST_MANAGE_EXTERNAL_STORAGE_PERMISSION = 1001;
+    File file;
+    MultipartBody.Part multipartBody;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+
+        recyclerView = findViewById(R.id.recyclerViewSinhVien);
+        search = findViewById(R.id.search);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(APIService.DOMAIN)
@@ -82,6 +101,78 @@ public class Home extends AppCompatActivity {
             }
         });
 
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String keyword =editable.toString().trim();
+                searchDistributor(keyword);
+            }
+        });
+
+        findViewById(R.id.giam).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Call<List<Cay>> call = apiService.getGiam();
+                call.enqueue(new Callback<List<Cay>>() {
+                    @Override
+                    public void onResponse(Call<List<Cay>> call, Response<List<Cay>> response) {
+                        if (response.isSuccessful()) {
+                            list = response.body();
+
+                            adapter = new AdapterCay(list,  getApplicationContext(), Home.this);
+
+                            recyclerView.setLayoutManager(new LinearLayoutManager(Home.this));
+                            recyclerView.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Cay>> call, Throwable t) {
+                        Log.e("Main", t.getMessage());
+                    }
+                });
+//                Toast.makeText(Home.this, "Linh dep trai", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        findViewById(R.id.tang).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Call<List<Cay>> call = apiService.getTang();
+                call.enqueue(new Callback<List<Cay>>() {
+                    @Override
+                    public void onResponse(Call<List<Cay>> call, Response<List<Cay>> response) {
+                        if (response.isSuccessful()) {
+                            list = response.body();
+
+                            adapter = new AdapterCay(list,  getApplicationContext(), Home.this);
+
+                            recyclerView.setLayoutManager(new LinearLayoutManager(Home.this));
+                            recyclerView.setAdapter(adapter);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Cay>> call, Throwable t) {
+                        Log.e("Main", t.getMessage());
+                    }
+                });
+//                Toast.makeText(Home.this, "Linh dep trai", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     void loadData(){
@@ -95,7 +186,6 @@ public class Home extends AppCompatActivity {
 
                     adapter = new AdapterCay(list,  getApplicationContext(), Home.this);
 
-                    recyclerView = findViewById(R.id.recyclerViewSinhVien);
                     recyclerView.setLayoutManager(new LinearLayoutManager(Home.this));
                     recyclerView.setAdapter(adapter);
                 }
@@ -124,78 +214,58 @@ public class Home extends AppCompatActivity {
         edten = dialog.findViewById(R.id.edtten);
         edgia = dialog.findViewById(R.id.edtgia);
         edkichthuoc = dialog.findViewById(R.id.edtkichthuoc);
-//        anh = dialog.findViewById(R.id.imgImage);
-        edtlinkurl = dialog.findViewById(R.id.edturl);
+        anh = dialog.findViewById(R.id.imgImage);
 
-//        anh.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) {
-//                    // Kiểm tra và yêu cầu quyền truy cập vào bộ nhớ ngoài
-//                    if (!Environment.isExternalStorageManager()) {
-//                        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-//                        startActivity(intent);
-//                        return;
-//                    }
-//                } else {
-//                    // Kiểm tra và yêu cầu quyền truy cập vào bộ nhớ ngoài
-//                    if (ContextCompat.checkSelfPermission(Home.this, Manifest.permission.READ_EXTERNAL_STORAGE)
-//                            != PackageManager.PERMISSION_GRANTED) {
-//                        // Yêu cầu quyền truy cập vào bộ nhớ ngoài
-//                        ActivityCompat.requestPermissions(Home.this,
-//                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-//                                2);
-//                        return;
-//                    }
-//                }
-//
-//                moThuVienAnh();
-//            }
-//        });
+        anh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                chooseImage();
+            }
+        });
 
         if (type != 0){
             edten.setText(cay.getTen());
             edgia.setText(cay.getGia()+"");
             edkichthuoc.setText(cay.getKichthuoc());
-            edtlinkurl.setText(cay.getAnh());
+            Glide.with(context)
+                    .load(cay.getAnh())
+                    .thumbnail(Glide.with(context).load(R.drawable.loading))
+                    .into(anh);
+            Log.d(TAG, "them: " + cay.getAnh());
         }
         dialog.findViewById(R.id.btnSave).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String ten = edten.getText().toString();
+                Map<String, RequestBody> mapRequestBody = new HashMap<>();
+                String _ten = edten.getText().toString();
                 String giastr = edgia.getText().toString();
-                String kichthuoc = edkichthuoc.getText().toString();
-                String anh = edtlinkurl.getText().toString();
+                String _kichthuoc = edkichthuoc.getText().toString();
 
-//                // Lấy đường dẫn của file ảnh
-//                String imagePath = getPath(selectedImage);
-//                Log.d(TAG, "anhvjp: "+ imagePath);
-//
-//                // Tạo instance của File từ đường dẫn
-//                File imageFile = new File(imagePath);
-//
-//                // Tạo request body cho file ảnh
-//                RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), imageFile);
-//
-//                // Tạo multipart body part từ request file
-//                MultipartBody.Part body = MultipartBody.Part.createFormData("image", imageFile.getName(), requestFile);
+                if (file != null) {
+                    RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
+                    multipartBody = MultipartBody.Part.createFormData("anh", file.getName(), requestFile);
+                } else {
+                    multipartBody = null;
+                }
 
-                if (ten.length() == 0 || giastr.length() == 0 || kichthuoc.length() == 0 || anh.length() == 0){
+                if (_ten.length() == 0 || giastr.length() == 0 || _kichthuoc.length() == 0){
                     Toast.makeText(context, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 try {
-                    Double gia = Double.parseDouble(giastr);
+                    Double _gia = Double.parseDouble(giastr);
 
-                    if (gia > 0){
-                        Cay cay1 = new Cay(anh, ten, gia, kichthuoc);
+                    mapRequestBody.put("ten", getRequestBody(_ten));
+                    mapRequestBody.put("gia", getRequestBody(String.valueOf(_gia)));
+                    mapRequestBody.put("kichthuoc", getRequestBody(_kichthuoc));
 
+                    if (_gia > 0){
                         if (type == 0){
-                            Call<Void> call = apiService.addCay(cay1);
-                            call.enqueue(new Callback<Void>() {
+                            Call<Cay> call = apiService.addCay(mapRequestBody, multipartBody);
+                            call.enqueue(new Callback<Cay>() {
                                 @Override
-                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                public void onResponse(Call<Cay> call, Response<Cay> response) {
                                     if (response.isSuccessful()) {
                                         loadData();
                                         Toast.makeText(Home.this, "Thêm thành công", Toast.LENGTH_SHORT).show();
@@ -205,32 +275,54 @@ public class Home extends AppCompatActivity {
                                     }
                                 }
                                 @Override
-                                public void onFailure(Call<Void> call, Throwable t) {
+                                public void onFailure(Call<Cay> call, Throwable t) {
                                     Log.e("Home", "Call failed: " + t.toString());
                                     Toast.makeText(Home.this, "Đã xảy ra lỗi khi thêm dữ liệu", Toast.LENGTH_SHORT).show();
                                 }
 
                             });
                         }else{
-                            Call<Void> call = apiService.updateCay(cay.get_id(), cay1);
-                            call.enqueue(new Callback<Void>() {
-                                @Override
-                                public void onResponse(Call<Void> call, Response<Void> response) {
-                                    if (response.isSuccessful()) {
-                                        loadData();
-                                        Toast.makeText(Home.this, "Sửa thành công", Toast.LENGTH_SHORT).show();
-                                        dialog.dismiss();
-                                    } else {
-                                        Toast.makeText(Home.this, "Sửa thất bại", Toast.LENGTH_SHORT).show();
+                            if (multipartBody != null){
+                                Call<Cay> call = apiService.updateCay(mapRequestBody, cay.get_id() , multipartBody);
+                                call.enqueue(new Callback<Cay>() {
+                                    @Override
+                                    public void onResponse(Call<Cay> call, Response<Cay> response) {
+                                        if (response.isSuccessful()) {
+                                            loadData();
+                                            Toast.makeText(Home.this, "Sửa thành công", Toast.LENGTH_SHORT).show();
+                                            dialog.dismiss();
+                                        } else {
+                                            Toast.makeText(Home.this, "Sửa thất bại", Toast.LENGTH_SHORT).show();
+                                        }
                                     }
-                                }
-                                @Override
-                                public void onFailure(Call<Void> call, Throwable t) {
-                                    Log.e("Home", "Call failed: " + t.toString());
-                                    Toast.makeText(Home.this, "Đã xảy ra lỗi khi sửa dữ liệu", Toast.LENGTH_SHORT).show();
-                                }
+                                    @Override
+                                    public void onFailure(Call<Cay> call, Throwable t) {
+                                        Log.e("Home", "Call failed: " + t.toString());
+                                        Toast.makeText(Home.this, "Đã xảy ra lỗi khi sửa dữ liệu", Toast.LENGTH_SHORT).show();
+                                    }
 
-                            });
+                                });
+                            }else{
+                                Call<Cay> call = apiService.updateNoImage(mapRequestBody, cay.get_id());
+                                call.enqueue(new Callback<Cay>() {
+                                    @Override
+                                    public void onResponse(Call<Cay> call, Response<Cay> response) {
+                                        if (response.isSuccessful()) {
+                                            loadData();
+                                            Toast.makeText(Home.this, "Sửa thành công no image", Toast.LENGTH_SHORT).show();
+                                            dialog.dismiss();
+                                        } else {
+                                            Toast.makeText(Home.this, "Sửa thất bại no image", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                    @Override
+                                    public void onFailure(Call<Cay> call, Throwable t) {
+                                        Log.e("Home", "Call failed: " + t.toString());
+                                        Toast.makeText(Home.this, "Đã xảy ra lỗi khi sửa dữ liệu", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                });
+                            }
                         }
                     }else{
                         Toast.makeText(context, "Giá phải lớn hơn 0", Toast.LENGTH_SHORT).show();
@@ -294,22 +386,84 @@ public class Home extends AppCompatActivity {
 
     }
 
-    private void moThuVienAnh() {
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(galleryIntent, 1);
+    private void chooseImage() {
+
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        getImage.launch(intent);
+
     }
 
-    private String getPath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) {
-            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            String path = cursor.getString(columnIndex);
-            cursor.close();
-            return path;
+    ActivityResultLauncher<Intent> getImage = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult o) {
+                    if (o.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = o.getData();
+                        Uri imageUri = data.getData();
+
+                        Log.d("RegisterActivity", imageUri.toString());
+
+                        file = createFileFormUri(imageUri, "anh");
+
+                        Glide.with(anh)
+                                .load(imageUri)
+                                .centerCrop()
+                                .circleCrop()
+                                .into(anh);
+                    }
+                }
+            });
+
+    private File createFileFormUri(Uri path, String name) {
+        File _file = new File(Home.this.getCacheDir(), name + ".png");
+        try {
+            InputStream in = Home.this.getContentResolver().openInputStream(path);
+            OutputStream out = new FileOutputStream(_file);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.close();
+            in.close();
+            return _file;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return uri.getPath();
+
+        return null;
+    }
+
+    private RequestBody getRequestBody(String value) {
+        return RequestBody.create(MediaType.parse("multipart/form-data"), value);
+    }
+
+    private void searchDistributor(String keyword) {
+        Call<List<Cay>> call = apiService.searchCay(keyword);
+        call.enqueue(new Callback<List<Cay>>() {
+            @Override
+            public void onResponse(Call<List<Cay>> call, Response<List<Cay>> response) {
+                if (response.isSuccessful()) {
+                    list = response.body();
+
+                    adapter = new AdapterCay(list,  getApplicationContext(), Home.this);
+
+                    recyclerView.setLayoutManager(new LinearLayoutManager(Home.this));
+                    recyclerView.setAdapter(adapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Cay>> call, Throwable t) {
+                Log.e("Search", "Search failed: " + t.toString());
+                Toast.makeText(Home.this, "Đã xảy ra lỗi kh tìm kiếm", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

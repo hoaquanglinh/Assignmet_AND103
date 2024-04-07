@@ -10,19 +10,6 @@ public class Cay {
     public Cay() {
     }
 
-    public Cay(String ten, double gia, String kichthuoc) {
-        this.ten = ten;
-        this.gia = gia;
-        this.kichthuoc = kichthuoc;
-    }
-
-    public Cay(String anh, String ten, double gia, String kichthuoc) {
-        this.anh = anh;
-        this.ten = ten;
-        this.gia = gia;
-        this.kichthuoc = kichthuoc;
-    }
-
     public Cay(String _id, String anh, String ten, double gia, String kichthuoc) {
         this._id = _id;
         this.anh = anh;

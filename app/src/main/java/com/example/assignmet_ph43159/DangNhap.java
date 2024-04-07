@@ -5,33 +5,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.example.assignmet_ph43159.Model.User;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class DangNhap extends AppCompatActivity {
-    private FirebaseAuth mAuth;
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        mAuth = FirebaseAuth.getInstance();
-
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-
-        }
-    }
+    APIService apiService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,17 +27,12 @@ public class DangNhap extends AppCompatActivity {
         EditText taikhoan = findViewById(R.id.txtuser);
         EditText matkhau = findViewById(R.id.txtpass);
 
-        String email;
-        String password;
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(APIService.DOMAIN)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-        Intent intent = getIntent();
-        Log.d("naruto:", "linh:" + intent.getStringExtra("email"));
-        if(intent != null){
-            email = intent.getStringExtra("email");
-            password = intent.getStringExtra("password");
-            taikhoan.setText(email);
-            matkhau.setText(password);
-        }
+        apiService = retrofit.create((APIService.class));
 
         findViewById(R.id.btndangky).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,43 +42,32 @@ public class DangNhap extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.btndangnhapPhone).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(DangNhap.this, Phone.class));
-            }
-        });
 
         findViewById(R.id.btndangnhap).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String email = taikhoan.getText().toString();
-                String password = matkhau.getText().toString();
+                User user = new User();
+                String _username = taikhoan.getText().toString().trim();
+                String _password = matkhau.getText().toString().trim();
+                user.setUsername(_username);
+                user.setPassword(_password);
 
-                if (email.trim().length() == 0 || password.trim().length() == 0 ){
-                    Toast.makeText(DangNhap.this, "Không được để trống thông tin", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+                Call<User> call = apiService.login(user);
+                call.enqueue(new Callback<User>() {
+                    @Override
+                    public void onResponse(Call<User> call, retrofit2.Response<User> response) {
+                        if (response.isSuccessful()){
+                            Toast.makeText(DangNhap.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(DangNhap.this, Home.class));
+                        }
+                    }
 
-                mAuth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(DangNhap.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    Log.d("Main", "createUserWithEmail:success");
-                                    FirebaseUser user = mAuth.getCurrentUser();
+                    @Override
+                    public void onFailure(Call<User> call, Throwable t) {
+                        Toast.makeText(DangNhap.this, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-                                    Toast.makeText(DangNhap.this, "Đăng nhập thành công", Toast.LENGTH_LONG).show();
-
-                                    Intent intent1 = new Intent(DangNhap.this, Home.class);
-                                    startActivity(intent1);
-                                } else {
-                                    Log.w("Main", "createUserWithEmail:failure", task.getException());
-                                    Toast.makeText(DangNhap.this, "Đăng nhập thất bại",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
             }
         });
     }

@@ -18,11 +18,34 @@
         android:layout_marginBottom="20dp"
         />
 
+    <ImageView
+        android:layout_marginBottom="10dp"
+        android:id="@+id/imageAvatar"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:scaleType="fitXY"
+        android:background="@drawable/baseline_broken_image_24"/>
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/txtuserdk"
+            android:id="@+id/edten"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="Họ và tên"
+            android:textSize="15dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edemail"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:hint="Email"
@@ -35,11 +58,24 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/txtpassdk"
+            android:id="@+id/edusername"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:hint="Nhập password"
+            android:hint="Username"
+            android:textSize="15dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edpassword"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="Password"
             android:textSize="15dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
