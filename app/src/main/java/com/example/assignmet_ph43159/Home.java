@@ -142,7 +142,6 @@ public class Home extends AppCompatActivity {
                         Log.e("Main", t.getMessage());
                     }
                 });
-//                Toast.makeText(Home.this, "Linh dep trai", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -169,7 +168,6 @@ public class Home extends AppCompatActivity {
                         Log.e("Main", t.getMessage());
                     }
                 });
-//                Toast.makeText(Home.this, "Linh dep trai", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -282,7 +280,7 @@ public class Home extends AppCompatActivity {
 
                             });
                         }else{
-                            if (multipartBody != null){
+                            if (file != null){
                                 Call<Cay> call = apiService.updateCay(mapRequestBody, cay.get_id() , multipartBody);
                                 call.enqueue(new Callback<Cay>() {
                                     @Override
@@ -324,6 +322,8 @@ public class Home extends AppCompatActivity {
                                 });
                             }
                         }
+
+                        file = null;
                     }else{
                         Toast.makeText(context, "Giá phải lớn hơn 0", Toast.LENGTH_SHORT).show();
                     }
@@ -410,8 +410,7 @@ public class Home extends AppCompatActivity {
 
                         Glide.with(anh)
                                 .load(imageUri)
-                                .centerCrop()
-                                .circleCrop()
+                                .skipMemoryCache(true)
                                 .into(anh);
                     }
                 }
@@ -432,12 +431,16 @@ public class Home extends AppCompatActivity {
             return _file;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            Log.d(TAG, "createFileFormUri: " + "loi anh");
         } catch (IOException e) {
             e.printStackTrace();
+            Log.d(TAG, "createFileFormUri: " + "loi anh 2");
         }
 
         return null;
     }
+
+
 
     private RequestBody getRequestBody(String value) {
         return RequestBody.create(MediaType.parse("multipart/form-data"), value);
