@@ -75,12 +75,21 @@ public class DangKy extends AppCompatActivity {
                 RequestBody _password = RequestBody.create(MediaType.parse("multipart/form-data"), edpassword.getText().toString().trim());
                 RequestBody _email = RequestBody.create(MediaType.parse("multipart/form-data"), edemail.getText().toString().trim());
                 RequestBody _name = RequestBody.create(MediaType.parse("multipart/form-data"), edname.getText().toString().trim());
+
                 MultipartBody.Part multipartBody;
                 if (file != null) {
                     RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), file);
                     multipartBody = MultipartBody.Part.createFormData("avatar", file.getName(), requestFile);
                 } else {
                     multipartBody = null;
+                }
+
+                if (edusername.getText().toString().trim().length() == 0 ||
+                        edpassword.getText().toString().trim().length() == 0 ||
+                        edemail.getText().toString().trim().length() == 0 ||
+                        edname.getText().toString().trim().length() == 0) {
+                    Toast.makeText(DangKy.this, "Không được để trống thông tin", Toast.LENGTH_SHORT).show();
+                    return;
                 }
 
                 Call<User> call = apiService.register(_username, _password, _email, _name, multipartBody);
@@ -91,6 +100,8 @@ public class DangKy extends AppCompatActivity {
                             Log.d(TAG, "onResponse: linh dang ky");
                             Toast.makeText(DangKy.this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(DangKy.this, DangNhap.class));
+                        } else {
+                            Toast.makeText(DangKy.this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();
                         }
                     }
 

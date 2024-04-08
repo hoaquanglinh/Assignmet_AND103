@@ -49,6 +49,12 @@ public class DangNhap extends AppCompatActivity {
                 User user = new User();
                 String _username = taikhoan.getText().toString().trim();
                 String _password = matkhau.getText().toString().trim();
+
+                if(_username.length() == 0 || _password.length() == 0){
+                    Toast.makeText(DangNhap.this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 user.setUsername(_username);
                 user.setPassword(_password);
 
@@ -59,6 +65,8 @@ public class DangNhap extends AppCompatActivity {
                         if (response.isSuccessful()){
                             Toast.makeText(DangNhap.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(DangNhap.this, Home.class));
+                        }else{
+                            Toast.makeText(DangNhap.this, "Tên tài khoản hoặc mật khẩu không chính xác", Toast.LENGTH_SHORT).show();
                         }
                     }
 
